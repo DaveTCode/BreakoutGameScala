@@ -1,13 +1,17 @@
 package tyler.breakout
 
 object Application {
-  /**
-   * Tests the Sys class, and serves as basic usage test
-   *
-   * @param args ignored
-   */
-  def main(args: Array[String]) : Unit = {
-    new DisplayTest().executeTest();
-    System.exit(0);
+
+  def main(args: Array[String]) {
+    loadSubsystems()
+    
+    Thread.sleep(10000)
+    
+    System.exit(0)
+  }
+  
+  def loadSubsystems() {
+    renderer.GlGraphicsDevice.init(false, 640, 480)
+    input.InputHandler.init()
   }
 }

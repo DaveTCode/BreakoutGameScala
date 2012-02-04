@@ -1,19 +1,21 @@
 package tyler.breakout.messaging
 
-/**
- * User: David
- * Date: 04/02/12
- * Time: 13:03
- */
+import collection.mutable.{LinkedList, HashMap}
 
 object MessagePassing {
+  private val registeredComponents = new HashMap[Message, LinkedList[MessagingComponent]]()
 
+  def register(component : MessagingComponent, message : Message) {
+    val componentList = registeredComponents.getOrElseUpdate(message, new LinkedList[MessagingComponent]())
 
-  def Register(component: Any, message: Message) {
-
+    componentList:+component
   }
 
-  def Receive(message: Message) {
+  def send(message: Message) {
+    val componentList = registeredComponents.getOrElse(message, new LinkedList[MessagingComponent]())
 
+    componentList.foreach((component: MessagingComponent) => {
+        component.receive(message)
+      })
   }
 }

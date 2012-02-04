@@ -1,6 +1,5 @@
-/**
- * User: David
- * Date: 04/02/12
- * Time: 13:28
- */
+package tyler.breakout.messaging
 
+trait MessagingComponent {
+  def receive(x: Message): Unit
+}
