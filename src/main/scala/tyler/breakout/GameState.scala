@@ -1,2 +1,6 @@
+package tyler.breakout
 
-abstract class GameState
+import messaging.{MessagingComponent, Message}
+
+abstract class GameState extends MessagingComponent {
+}

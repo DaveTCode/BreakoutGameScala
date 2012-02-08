@@ -15,7 +15,8 @@ object MessagePassing {
     val componentList = registeredComponents.getOrElse(message, new LinkedList[MessagingComponent]())
 
     componentList.foreach((component: MessagingComponent) => {
-        component.receive(message)
-      })
+      println(component.toString() + " -> " + message.toString())
+      component.receive(message)
+    })
   }
 }

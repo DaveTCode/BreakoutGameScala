@@ -1,6 +1,8 @@
 package tyler.breakout
 
 object Application {
+  
+  val startTime = System.currentTimeMillis()
 
   def main(args: Array[String]) {
     loadSubsystems()
@@ -8,6 +10,10 @@ object Application {
     Thread.sleep(10000)
     
     System.exit(0)
+  }
+  
+  def ticks(): Long = {
+    System.currentTimeMillis() - startTime
   }
   
   def loadSubsystems() {
