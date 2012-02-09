@@ -1,23 +1,20 @@
 package tyler.breakout
 
+import org.newdawn.slick.AppGameContainer
+
 object Application {
   
   val startTime = System.currentTimeMillis()
 
   def main(args: Array[String]) {
-    loadSubsystems()
-    
-    Thread.sleep(10000)
-    
-    System.exit(0)
+
+    val agc = new AppGameContainer(new Game)
+
+    agc.setDisplayMode(800, 600, false)
+    agc.start()
   }
   
   def ticks(): Long = {
     System.currentTimeMillis() - startTime
-  }
-  
-  def loadSubsystems() {
-    renderer.GlGraphicsDevice.init(false, 640, 480)
-    input.InputHandler.init()
   }
 }
