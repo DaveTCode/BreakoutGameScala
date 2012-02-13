@@ -1,16 +1,21 @@
 package tyler.breakout
 
-import de.lessvoid.nifty.Nifty
 import de.lessvoid.nifty.screen.{Screen, ScreenController}
+import de.lessvoid.nifty.{EndNotify, Nifty}
+import org.newdawn.slick.GameContainer
+import org.newdawn.slick.state.StateBasedGame
 
-class MainMenuController extends ScreenController {
+class MainMenuController(game: Game) extends ScreenController {
+  var mNifty: Nifty = null
+  var mScreen: Screen = null
 
-  
   override def bind(nifty: Nifty, screen: Screen) {
-    
+    mNifty = nifty;
+    mScreen = screen;
   }
   
   override def onStartScreen() {
+
   }
   
   override def onEndScreen() {
@@ -19,13 +24,13 @@ class MainMenuController extends ScreenController {
   def newGame() {
     println("New Game clicked")
 
-    Game.
+    game.startGame()
   }
   
   def exit() {
-    println("Exit clicked")
-
-    System.exit(0)
+    mScreen.endScreen(new EndNotify() {
+      def perform() { System.exit(0) }
+    })
   }
 }
 

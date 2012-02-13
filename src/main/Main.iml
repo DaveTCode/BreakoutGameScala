@@ -11,7 +11,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://C:/Program Files/scala/lib/scala-compiler.jar!/" />
+          <root url="jar://C:/Program Files (x86)/scala/lib/scala-library.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -20,7 +20,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://C:/Program Files/scala/lib/scala-library.jar!/" />
+          <root url="jar://C:/Program Files (x86)/scala/lib/scala-compiler.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

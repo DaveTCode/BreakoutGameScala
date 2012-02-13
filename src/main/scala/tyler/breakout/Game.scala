@@ -9,7 +9,11 @@ class Game extends StateBasedGame("Breakout - Scala") {
   val IN_GAME_STATE_ID   = 1
 
   override def initStatesList(gameContainer: GameContainer) {
-    addState(new MainMenuGameState(MAIN_MENU_STATE_ID))
-    addState(new InGameGameState(IN_GAME_STATE_ID))
+    addState(new MainMenuGameState(MAIN_MENU_STATE_ID, this))
+    addState(new InGameGameState(IN_GAME_STATE_ID, this))
+  }
+
+  def startGame() {
+    enterState(IN_GAME_STATE_ID)
   }
 }
