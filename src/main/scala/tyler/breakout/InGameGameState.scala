@@ -4,7 +4,6 @@ import collisions.CollisionHandler
 import config.Configuration
 import input.InputHandler
 import rendering.Renderer
-import scala.collection.mutable.ArrayBuffer
 import messaging._
 import org.newdawn.slick.state.{StateBasedGame}
 import org.newdawn.slick.{Graphics, GameContainer}
@@ -12,6 +11,7 @@ import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState
 import de.lessvoid.nifty.Nifty
 import de.lessvoid.nifty.builder.{ImageBuilder, LayerBuilder, ScreenBuilder}
 import org.newdawn.slick.geom.Vector2f
+import collection.mutable.{ArrayBuffer}
 
 class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameState with MessagingComponent {
   val INIT_BAT_POS = new Vector2f(Configuration.gameWidth / 2.0f,
@@ -112,20 +112,25 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
    * @return
    */
   def batPosition(t: Long): Vector2f = {
-    val (finalPos, finalVel, finalT) = batVelocityEvents(t).foldLeft((INIT_BAT_POS, INIT_BAT_VEL, 0l)) {
-      case ((currentBatPos, currentBatVel, currentT), message) => {
-        val deltaT = (message.t - currentT) / 1000.0f
-
-        (new Vector2f(currentBatPos.getX + currentBatVel.getX * deltaT,
-                      currentBatPos.getY + currentBatVel.getY * deltaT),
-         message.vel,
-         message.t)
+    def recurCalcPosition(velocityChanges: List[BatVelocityChange],
+                          currentPos: Vector2f,
+                          currentVel: Vector2f,
+                          currentTime: Long): Vector2f = {
+      velocityChanges match {
+        case Nil => {
+          val deltaT = (t - currentTime) / 1000.0f
+          currentPos.add(currentVel.scale(deltaT))
+        }
+        case head :: tail => {
+          val deltaT = (head.t - currentTime) / 1000.0f
+          val newPos = currentPos.add(currentVel.scale(deltaT))
+          
+          recurCalcPosition(tail, newPos, head.vel, head.t)
+        } 
       }
     }
 
-    val finalDeltaT = (t - finalT) / 1000.0f
-    new Vector2f(finalPos.getX + finalVel.getX * finalDeltaT,
-                 finalPos.getY + finalVel.getY * finalDeltaT)
+    recurCalcPosition(batVelocityEvents(t).toList, INIT_BAT_POS, INIT_BAT_VEL, 0)
   }
 
   /**
@@ -151,19 +156,24 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
    * @return Vector2f representing the ball position.
    */
   def ballPosition(t: Long): Vector2f = {
-    val (finalPos, finalVel, finalT) = ballVelocityEvents(t).foldLeft((INIT_BALL_POS, INIT_BALL_VEL, 0l)) {
-      case ((currentBallPos, currentBallVel, currentT), message) => {
-        val deltaT = (message.t - currentT) / 1000.0f
+    def recurCalcPosition(velocityChanges: List[BallVelocityChange],
+                          currentPos: Vector2f,
+                          currentVel: Vector2f,
+                          currentTime: Long): Vector2f = {
+      velocityChanges match {
+        case Nil => {
+          val deltaT = (t - currentTime) / 1000.0f
+          currentPos.add(currentVel.scale(deltaT))
+        }
+        case head :: tail => {
+          val deltaT = (head.t - currentTime) / 1000.0f
+          val newPos = currentPos.add(currentVel.scale(deltaT))
 
-        (new Vector2f(currentBallPos.getX + currentBallVel.getX * deltaT,
-                      currentBallPos.getY + currentBallVel.getY * deltaT),
-         message.vel,
-         message.t)
+          recurCalcPosition(tail, newPos, head.vel, head.t)
+        }
       }
     }
 
-    val finalDeltaT = (t - finalT) / 1000.0f
-    new Vector2f(finalPos.getX + finalVel.getX * finalDeltaT,
-                 finalPos.getY + finalVel.getY * finalDeltaT)
+    recurCalcPosition(ballVelocityEvents(t).toList, INIT_BALL_POS, INIT_BALL_VEL, 0)
   }
 }
