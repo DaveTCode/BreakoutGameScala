@@ -1,9 +1,8 @@
 package tyler.breakout.collisions
 
-import tyler.breakout.InGameGameState
-import org.newdawn.slick.geom.Vector2f
 import tyler.breakout.messaging.{BallVelocityChange, BatVelocityChange, MessagePassing}
 import tyler.breakout.config.Configuration
+import tyler.breakout.{ImmutableVector2f, InGameGameState}
 
 /**
  * Game specific collision detection. Only entrance point is through the common
@@ -27,11 +26,11 @@ object CollisionHandler {
   private def checkBatWallCollision(gameState: InGameGameState, t: Long) {
     val batPos = gameState.batPosition(t)
     val batVel = gameState.batVelocity(t)
-    val batLeft = batPos.getX - (Configuration.batWidth / 2.0f)
-    val batRight = batPos.getX + (Configuration.batWidth / 2.0f)
+    val batLeft = batPos.x - (Configuration.batWidth / 2.0f)
+    val batRight = batPos.x + (Configuration.batWidth / 2.0f)
 
     if (batLeft < 0.0f || batRight > Configuration.gameWidth) {
-      MessagePassing.send(new BatVelocityChange(t, new Vector2f(0.0f, 0.0f)))
+      MessagePassing.send(new BatVelocityChange(t, new ImmutableVector2f(0.0f, 0.0f)))
     }
   }
 
@@ -45,18 +44,18 @@ object CollisionHandler {
   private def checkBallWallCollision(gameState: InGameGameState, t: Long) {
     val ballPos = gameState.ballPosition(t)
     val ballVel = gameState.ballVelocity(t)
-    val ballTop = ballPos.getY - Configuration.ballRadius
-    val ballLeft = ballPos.getX - Configuration.ballRadius
-    val ballRight = ballPos.getX + Configuration.ballRadius
+    val ballTop = ballPos.y - Configuration.ballRadius
+    val ballLeft = ballPos.x - Configuration.ballRadius
+    val ballRight = ballPos.x + Configuration.ballRadius
     
     if (ballLeft < 0.0f || ballRight > Configuration.gameWidth) {
-      val newVel = new Vector2f(-1.0f * ballVel.getX, ballVel.getY)
+      val newVel = new ImmutableVector2f(-1.0f * ballVel.x, ballVel.y)
       
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }
     
     if (ballTop < 0.0f) {
-      val newVel = new Vector2f(ballVel.getX, -1 * ballVel.getY)
+      val newVel = new ImmutableVector2f(ballVel.x, -1 * ballVel.y)
 
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }

@@ -10,16 +10,15 @@ import org.newdawn.slick.{Graphics, GameContainer}
 import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState
 import de.lessvoid.nifty.Nifty
 import de.lessvoid.nifty.builder.{ImageBuilder, LayerBuilder, ScreenBuilder}
-import org.newdawn.slick.geom.Vector2f
 import collection.mutable.{ArrayBuffer}
 
 class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameState with MessagingComponent {
-  val INIT_BAT_POS = new Vector2f(Configuration.gameWidth / 2.0f,
-                                  Configuration.gameHeight - 5.0f)
-  val INIT_BAT_VEL = new Vector2f(0.0f, 0.0f)
-  val INIT_BALL_POS = new Vector2f(Configuration.gameWidth / 2.0f,
-                                   Configuration.gameHeight / 3.0f)
-  val INIT_BALL_VEL = new Vector2f(0.0f, 0.0f)
+  val INIT_BAT_POS = new ImmutableVector2f(Configuration.gameWidth / 2.0f,
+                                           Configuration.gameHeight - 5.0f)
+  val INIT_BAT_VEL = new ImmutableVector2f(0.0f, 0.0f)
+  val INIT_BALL_POS = new ImmutableVector2f(Configuration.gameWidth / 2.0f,
+                                            Configuration.gameHeight / 3.0f)
+  val INIT_BALL_VEL = new ImmutableVector2f(0.0f, 0.0f)
 
   override def getID(): Int = stateId
   
@@ -49,15 +48,15 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
 
   override def initGameAndGUI(gameContainer: GameContainer,
                               game: StateBasedGame) {
-    MessagePassing.register(this, (new BatVelocityChange(0, new Vector2f())).name)
-    MessagePassing.register(this, (new BallVelocityChange(0, new Vector2f())).name)
+    MessagePassing.register(this, (new BatVelocityChange(0, new ImmutableVector2f(0.0f, 0.0f))).name)
+    MessagePassing.register(this, (new BallVelocityChange(0, new ImmutableVector2f(0.0f, 0.0f))).name)
 
     initNifty(gameContainer, game)
 
     MessagePassing.send(new BallVelocityChange(Application.ticks,
-                                               new Vector2f(20.0f, -7.0f)))
+                                               new ImmutableVector2f(20.0f, -7.0f)))
     MessagePassing.send(new BatVelocityChange(Application.ticks,
-                                              new Vector2f(0.0f, 0.0f)))
+                                              new ImmutableVector2f(0.0f, 0.0f)))
   }
 
   override protected def renderGame(gameContainer: GameContainer,
@@ -99,7 +98,7 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
    *
    * @return
    */
-  def batVelocity(t: Long): Vector2f = {
+  def batVelocity(t: Long): ImmutableVector2f = {
     batVelocityEvents(t).last.vel
   }
 
@@ -111,19 +110,19 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
    *
    * @return
    */
-  def batPosition(t: Long): Vector2f = {
+  def batPosition(t: Long): ImmutableVector2f = {
     def recurCalcPosition(velocityChanges: List[BatVelocityChange],
-                          currentPos: Vector2f,
-                          currentVel: Vector2f,
-                          currentTime: Long): Vector2f = {
+                          currentPos: ImmutableVector2f,
+                          currentVel: ImmutableVector2f,
+                          currentTime: Long): ImmutableVector2f = {
       velocityChanges match {
         case Nil => {
           val deltaT = (t - currentTime) / 1000.0f
-          currentPos.add(currentVel.scale(deltaT))
+          currentPos + currentVel.scale(deltaT)
         }
         case head :: tail => {
           val deltaT = (head.t - currentTime) / 1000.0f
-          val newPos = currentPos.add(currentVel.scale(deltaT))
+          val newPos = currentPos + currentVel.scale(deltaT)
           
           recurCalcPosition(tail, newPos, head.vel, head.t)
         } 
@@ -140,7 +139,7 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
    *
    * @return
    */
-  def ballVelocity(t: Long): Vector2f = {
+  def ballVelocity(t: Long): ImmutableVector2f = {
     ballVelocityEvents(t).last.vel
   }
 
@@ -155,19 +154,19 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
    *
    * @return Vector2f representing the ball position.
    */
-  def ballPosition(t: Long): Vector2f = {
+  def ballPosition(t: Long): ImmutableVector2f = {
     def recurCalcPosition(velocityChanges: List[BallVelocityChange],
-                          currentPos: Vector2f,
-                          currentVel: Vector2f,
-                          currentTime: Long): Vector2f = {
+                          currentPos: ImmutableVector2f,
+                          currentVel: ImmutableVector2f,
+                          currentTime: Long): ImmutableVector2f = {
       velocityChanges match {
         case Nil => {
           val deltaT = (t - currentTime) / 1000.0f
-          currentPos.add(currentVel.scale(deltaT))
+          currentPos + currentVel.scale(deltaT)
         }
         case head :: tail => {
           val deltaT = (head.t - currentTime) / 1000.0f
-          val newPos = currentPos.add(currentVel.scale(deltaT))
+          val newPos = currentPos + currentVel.scale(deltaT)
 
           recurCalcPosition(tail, newPos, head.vel, head.t)
         }

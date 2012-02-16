@@ -8,9 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="nifty-1.3.1" level="project" />
-    <orderEntry type="library" name="xpp3_min-1.1.4c" level="project" />
-    <orderEntry type="library" name="simpleeventbus-1.x" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -27,6 +24,16 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://C:/Program Files (x86)/scala/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://C:/Program Files (x86)/scala/lib" recursive="false" />
       </library>
     </orderEntry>
   </component>

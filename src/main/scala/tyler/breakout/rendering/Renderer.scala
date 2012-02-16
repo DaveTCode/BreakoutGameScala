@@ -12,10 +12,10 @@ object Renderer {
   def draw(t: Long, gameState: InGameGameState) {
     val ballPos = gameState.ballPosition(t)
     val batPos = gameState.batPosition(t)
-
+    
     backgroundImage.draw(0.0f, 0.0f)
 
-    ballImage.draw(ballPos.getX, ballPos.getY)
-    batImage.draw(batPos.getX, batPos.getY)
+    ballImage.draw(ballPos.x, ballPos.y)
+    batImage.draw(batPos.x, batPos.y)
   }
 }
