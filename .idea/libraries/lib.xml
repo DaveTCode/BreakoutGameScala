@@ -11,8 +11,14 @@
       <root url="jar://$PROJECT_DIR$/lib/lwjgl-debug.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/lwjgl_test.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/asm-debug-all.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/nifty-1.3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/nifty-slick-renderer-1.3.1.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/nifty-slick-renderer-1.3.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/nifty-slick-renderer-1.3.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
