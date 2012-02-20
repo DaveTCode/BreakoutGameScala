@@ -1,7 +1,6 @@
 package tyler.breakout
 
 import collisions.CollisionHandler
-import config.Configuration
 import input.InputHandler
 import rendering.Renderer
 import messaging._
@@ -10,15 +9,12 @@ import org.newdawn.slick.{Graphics, GameContainer}
 import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState
 import de.lessvoid.nifty.Nifty
 import de.lessvoid.nifty.builder.{ImageBuilder, LayerBuilder, ScreenBuilder}
-import collection.mutable.{ArrayBuffer}
+import collection.mutable.ArrayBuffer
 
-class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameState with MessagingComponent {
-  val INIT_BAT_POS = new ImmutableVector2f(Configuration.gameWidth / 2.0f,
-                                           Configuration.gameHeight - 5.0f)
-  val INIT_BAT_VEL = new ImmutableVector2f(0.0f, 0.0f)
-  val INIT_BALL_POS = new ImmutableVector2f(Configuration.gameWidth / 2.0f,
-                                            Configuration.gameHeight / 3.0f)
-  val INIT_BALL_VEL = new ImmutableVector2f(0.0f, 0.0f)
+class InGameGameState(stateId: Int, game: Game, level: Level) extends NiftyOverlayBasicGameState with MessagingComponent {
+
+  private val mLevelInstance = new LevelInstance(level)
+  private val mEventBuffer = new ArrayBuffer[Message]
 
   override def getID(): Int = stateId
 
@@ -76,4 +72,10 @@ class InGameGameState(stateId: Int, game: Game) extends NiftyOverlayBasicGameSta
       case message: BatVelocityChange => mEventBuffer += message
     }
   }
+  
+  def batPosition(t: Long) = mLevelInstance.batPosition(t, mEventBuffer)
+  def batVelocity(t: Long) = mLevelInstance.batVelocity(t, mEventBuffer)
+  
+  def ballPosition(t: Long) = mLevelInstance.ballPosition(t, mEventBuffer)
+  def ballVelocity(t: Long) = mLevelInstance.ballVelocity(t, mEventBuffer)
 }

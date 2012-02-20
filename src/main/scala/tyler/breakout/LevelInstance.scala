@@ -5,16 +5,14 @@ import messaging.{BallVelocityChange, BatVelocityChange, Message}
 
 class LevelInstance(level: Level) {
 
-  private val mEventBuffer = new ArrayBuffer[Message]
-
   /**
    * All velocity events for the bat in order from oldest to youngest
    *
    * @param t - Only events before this point taken into account
    * @return
    */
-  private def batVelocityEvents(t: Long): Seq[BatVelocityChange] = {
-    mEventBuffer.filter(message => message.ticks < t) collect {
+  private def batVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BatVelocityChange] = {
+    eventBuffer.filter(message => message.ticks < t) collect {
       case message: BatVelocityChange => message
     }
   }
@@ -25,8 +23,8 @@ class LevelInstance(level: Level) {
    * @param t - Only events before this point taken into account
    * @return
    */
-  private def ballVelocityEvents(t: Long): Seq[BallVelocityChange] = {
-    mEventBuffer.filter(message => message.ticks < t) collect {
+  private def ballVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BallVelocityChange] = {
+    eventBuffer.filter(message => message.ticks < t) collect {
       case message: BallVelocityChange => message
     }
   }
@@ -38,8 +36,8 @@ class LevelInstance(level: Level) {
    *
    * @return
    */
-  def batVelocity(t: Long): ImmutableVector2f = {
-    batVelocityEvents(t).last.vel
+  def batVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
+    batVelocityEvents(t, eventBuffer).last.vel
   }
 
   /**
@@ -50,7 +48,7 @@ class LevelInstance(level: Level) {
    *
    * @return
    */
-  def batPosition(t: Long): ImmutableVector2f = {
+  def batPosition(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
     def recurCalcPosition(velocityChanges: List[BatVelocityChange],
                           currentPos: ImmutableVector2f,
                           currentVel: ImmutableVector2f,
@@ -69,7 +67,7 @@ class LevelInstance(level: Level) {
       }
     }
 
-    recurCalcPosition(batVelocityEvents(t).toList,
+    recurCalcPosition(batVelocityEvents(t, eventBuffer).toList,
                       level.initialBatPosition(),
                       level.initialBatVelocity(),
                       0)
@@ -82,8 +80,8 @@ class LevelInstance(level: Level) {
    *
    * @return
    */
-  def ballVelocity(t: Long): ImmutableVector2f = {
-    ballVelocityEvents(t).last.vel
+  def ballVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
+    ballVelocityEvents(t, eventBuffer).last.vel
   }
 
   /**
@@ -97,7 +95,7 @@ class LevelInstance(level: Level) {
    *
    * @return Vector2f representing the ball position.
    */
-  def ballPosition(t: Long): ImmutableVector2f = {
+  def ballPosition(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
     def recurCalcPosition(velocityChanges: List[BallVelocityChange],
                           currentPos: ImmutableVector2f,
                           currentVel: ImmutableVector2f,
@@ -116,7 +114,7 @@ class LevelInstance(level: Level) {
       }
     }
 
-    recurCalcPosition(ballVelocityEvents(t).toList,
+    recurCalcPosition(ballVelocityEvents(t, eventBuffer).toList,
                       level.initialBallPosition(),
                       level.initialBallVelocity(),
                       0)
