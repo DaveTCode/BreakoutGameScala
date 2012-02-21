@@ -1,15 +1,10 @@
 package tyler.breakout
 
+import levels.RedBrick
+
 abstract class Level {
 
-  /**
-   * Get the initial contents of the location x,y. Implementation decides how
-   * to determine the contents.
-   *
-   * @param x
-   * @param y
-   */
-  def getContentsOfLocation(x: Int,  y: Int)
+  def blockCollection(): Seq[RedBrick]
 
   def initialBatPosition(): ImmutableVector2f
   def initialBatVelocity(): ImmutableVector2f

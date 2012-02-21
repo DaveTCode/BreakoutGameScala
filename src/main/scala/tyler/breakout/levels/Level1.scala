@@ -6,7 +6,7 @@ import util.Random
 
 class Level1 extends Level {
   object Level1Constants {
-    private val BALL_SPEED = 2.0
+    private val BALL_SPEED = 100.0
     private val TOP_PADDING = 30
 
     val INIT_BAT_POS = new ImmutableVector2f(Configuration.gameWidth / 2, Configuration.gameHeight - 5)
@@ -30,20 +30,21 @@ class Level1 extends Level {
 
       for (i <- 0 until numBricksHorizontal;
            j <- 0 until numBricksVertical)
-        yield new RedBrick(x * Configuration.brickWidth,
-                           TOP_PADDING + y * Configuration.brickHeight,
+        yield new RedBrick(i * Configuration.brickWidth,
+                           TOP_PADDING + j * Configuration.brickHeight,
                            Configuration.brickWidth,
                            Configuration.brickHeight)
     }
   }
 
-  def blockCollection(): Seq[RedBrick] = {
+  override def blockCollection(): Seq[RedBrick] = {
+    Level1Constants.BLOCK_COLLECTION.foreach(brick => println(brick))
     Level1Constants.BLOCK_COLLECTION
   }
 
-  def initialBatPosition(): ImmutableVector2f = Level1Constants.INIT_BAT_POS
-  def initialBatVelocity(): ImmutableVector2f = Level1Constants.INIT_BAT_VEL
+  override def initialBatPosition(): ImmutableVector2f = Level1Constants.INIT_BAT_POS
+  override def initialBatVelocity(): ImmutableVector2f = Level1Constants.INIT_BAT_VEL
 
-  def initialBallPosition(): ImmutableVector2f = Level1Constants.INIT_BALL_POS
-  def initialBallVelocity(): ImmutableVector2f = Level1Constants.INIT_BALL_VEL
+  override def initialBallPosition(): ImmutableVector2f = Level1Constants.INIT_BALL_POS
+  override def initialBallVelocity(): ImmutableVector2f = Level1Constants.INIT_BALL_VEL
 }

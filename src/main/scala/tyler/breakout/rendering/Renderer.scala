@@ -8,6 +8,7 @@ object Renderer {
   val backgroundImage = new Image(Configuration.backgroundImage)
   val ballImage = new Image(Configuration.ballImageFile)
   val batImage = new Image(Configuration.batImageFile)
+  val redBrickImage = new Image(Configuration.redBrickImageFile)
   
   def draw(t: Long, gameState: InGameGameState) {
     val ballPos = gameState.ballPosition(t)
@@ -17,5 +18,9 @@ object Renderer {
 
     ballImage.draw(ballPos.x, ballPos.y)
     batImage.draw(batPos.x, batPos.y)
+    
+    gameState.allLiveBlocks(t).foreach(brick =>
+      redBrickImage.draw(brick.x, brick.y, brick.width, brick.height)
+    )
   }
 }

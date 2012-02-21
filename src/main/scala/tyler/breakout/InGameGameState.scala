@@ -2,6 +2,7 @@ package tyler.breakout
 
 import collisions.CollisionHandler
 import input.InputHandler
+import levels.RedBrick
 import rendering.Renderer
 import messaging._
 import org.newdawn.slick.state.{StateBasedGame}
@@ -44,13 +45,9 @@ class InGameGameState(stateId: Int, game: Game, level: Level) extends NiftyOverl
                               game: StateBasedGame) {
     MessagePassing.register(this, (new BatVelocityChange(0, new ImmutableVector2f(0.0f, 0.0f))).name)
     MessagePassing.register(this, (new BallVelocityChange(0, new ImmutableVector2f(0.0f, 0.0f))).name)
+    MessagePassing.register(this, (new BrickHitEvent(0, new RedBrick(0,0,0,0))).name)
 
     initNifty(gameContainer, game)
-
-    MessagePassing.send(new BallVelocityChange(Application.ticks,
-                                               new ImmutableVector2f(20.0f, -7.0f)))
-    MessagePassing.send(new BatVelocityChange(Application.ticks,
-                                              new ImmutableVector2f(0.0f, 0.0f)))
   }
 
   override protected def renderGame(gameContainer: GameContainer,
@@ -78,4 +75,6 @@ class InGameGameState(stateId: Int, game: Game, level: Level) extends NiftyOverl
   
   def ballPosition(t: Long) = mLevelInstance.ballPosition(t, mEventBuffer)
   def ballVelocity(t: Long) = mLevelInstance.ballVelocity(t, mEventBuffer)
+
+  def allLiveBlocks(t: Long) = mLevelInstance.liveBlocks(t, mEventBuffer)
 }

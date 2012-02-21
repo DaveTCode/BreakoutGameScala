@@ -1,7 +1,7 @@
 package tyler.breakout
 
-import collection.mutable.ArrayBuffer
-import messaging.{BallVelocityChange, BatVelocityChange, Message}
+import levels.RedBrick
+import messaging.{BrickHitEvent, BallVelocityChange, BatVelocityChange, Message}
 
 class LevelInstance(level: Level) {
 
@@ -9,6 +9,7 @@ class LevelInstance(level: Level) {
    * All velocity events for the bat in order from oldest to youngest
    *
    * @param t - Only events before this point taken into account
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
   private def batVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BatVelocityChange] = {
@@ -21,6 +22,7 @@ class LevelInstance(level: Level) {
    * All velocity events for the ball in order from oldest to youngest
    *
    * @param t - Only events before this point taken into account
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
   private def ballVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BallVelocityChange] = {
@@ -30,14 +32,30 @@ class LevelInstance(level: Level) {
   }
 
   /**
+   * All events which indicate that a brick has been hit.
+   *
+   * @param t - Game time (as retrieved by Application.ticks)
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
+   * @return
+   */
+  private def brickHitEvents(t: Long, eventBuffer: Seq[Message]): Seq[BrickHitEvent] = {
+    eventBuffer.filter(message => message.ticks < t) collect  {
+      case message: BrickHitEvent => message
+    }
+  }
+  
+  /**
    * The latest velocity of the bat. Used to draw animations.
    *
    * @param t - Game time (as retrieved by Application.ticks)
-   *
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
   def batVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
-    batVelocityEvents(t, eventBuffer).last.vel
+    batVelocityEvents(t, eventBuffer) match {
+      case Nil => level.initialBatVelocity()
+      case lst => lst.last.vel
+    }
   }
 
   /**
@@ -45,7 +63,7 @@ class LevelInstance(level: Level) {
    * collisions.
    *
    * @param t - Game time (as retrieved by Application.ticks)
-   *
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
   def batPosition(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
@@ -77,11 +95,15 @@ class LevelInstance(level: Level) {
    * Calculate the current velocity of the ball.
    *
    * @param t - Game time (as retrieved by Application.ticks)
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
    *
    * @return
    */
   def ballVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
-    ballVelocityEvents(t, eventBuffer).last.vel
+    ballVelocityEvents(t, eventBuffer) match {
+      case Nil => level.initialBallVelocity()
+      case lst => lst.last.vel
+    }
   }
 
   /**
@@ -92,6 +114,7 @@ class LevelInstance(level: Level) {
    * library is for future.
    *
    * @param t - Game time (as retrieved by Application.ticks)
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
    *
    * @return Vector2f representing the ball position.
    */
@@ -118,6 +141,21 @@ class LevelInstance(level: Level) {
                       level.initialBallPosition(),
                       level.initialBallVelocity(),
                       0)
+  }
+
+  /**
+   * All live blocks at time t.
+   *
+   * @param t - Game time (as retrieved by Application.ticks)
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
+   * @return
+   */
+  def liveBlocks(t: Long, eventBuffer: Seq[Message]): Seq[RedBrick] = {
+    val initBlockCollection = level.blockCollection()
+    val brickHitCollection = brickHitEvents(t, eventBuffer)
+
+    initBlockCollection.filter(
+      brick => !brickHitCollection.exists(message => message.brick == brick))
   }
 }
 
