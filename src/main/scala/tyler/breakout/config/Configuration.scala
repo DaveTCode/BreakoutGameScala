@@ -11,8 +11,8 @@ object Configuration {
 
   def ballRadius: Int = 3
 
-  def brickWidth: Int = 8
-  def brickHeight: Int = 3
+  def brickWidth: Int = 20
+  def brickHeight: Int = 8
 
   def backgroundImage = "/src/main/resources/bg-game.png"
   def ballImageFile = "/src/main/resources/ball.png"

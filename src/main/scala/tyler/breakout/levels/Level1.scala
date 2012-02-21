@@ -38,7 +38,6 @@ class Level1 extends Level {
   }
 
   override def blockCollection(): Seq[RedBrick] = {
-    Level1Constants.BLOCK_COLLECTION.foreach(brick => println(brick))
     Level1Constants.BLOCK_COLLECTION
   }
 
