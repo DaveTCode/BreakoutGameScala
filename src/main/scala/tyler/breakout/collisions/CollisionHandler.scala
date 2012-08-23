@@ -15,6 +15,7 @@ object CollisionHandler {
   def checkCurrentCollisions(gameState: InGameGameState, t: Long) {
     checkBatWallCollision(gameState, t)
     checkBallWallCollision(gameState, t)
+    checkBallBatCollision(gameState, t)
   }
 
   /**
@@ -61,8 +62,28 @@ object CollisionHandler {
     }
   }
 
+  /**
+   * Check and handle ball <-> bat collision. Essentially just reflect the ball
+   * along the y value if it hits the bat at all.
+   *
+   * @param gameState
+   * @param t
+   */
   private def checkBallBatCollision(gameState: InGameGameState, t: Long) {
     val ballPos = gameState.ballPosition(t)
+    val ballVel = gameState.ballVelocity(t)
     val batPos = gameState.batPosition(t)
+    val ballBottom = ballPos.y + Configuration.ballRadius
+    val ballLeft = ballPos.x - Configuration.ballRadius
+    val ballRight = ballPos.x + Configuration.ballRadius
+    val batTop = batPos.y
+    val batLeft = batPos.x
+    val batRight = batPos.x + Configuration.batWidth
+
+    if (ballBottom > batTop && ballRight > batLeft && ballLeft < batRight) {
+      val newVel = new ImmutableVector2f(ballVel.x, -1 * ballVel.y)
+
+      MessagePassing.send(new BallVelocityChange(t, newVel))
+    }
   }
 }

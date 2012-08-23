@@ -6,7 +6,7 @@ import util.Random
 
 class Level1 extends Level {
   object Level1Constants {
-    private val BALL_SPEED = 100.0
+    private val BALL_SPEED = 10.0
     private val TOP_PADDING = 30
 
     val INIT_BAT_POS = new ImmutableVector2f(Configuration.gameWidth / 2, Configuration.gameHeight - 5)
