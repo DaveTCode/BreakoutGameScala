@@ -25,7 +25,7 @@ class Level1 extends Level {
     }
     
     private def createBlockCollection: Seq[RedBrick] = {
-      val numBricksHorizontal = Configuration.gameWidth / Configuration.brickWidth;
+      val numBricksHorizontal = Configuration.gameWidth / Configuration.brickWidth
       val numBricksVertical = 4
 
       for (i <- 0 until numBricksHorizontal;

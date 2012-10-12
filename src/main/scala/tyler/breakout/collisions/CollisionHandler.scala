@@ -3,6 +3,7 @@ package tyler.breakout.collisions
 import tyler.breakout.messaging.{BallVelocityChange, BatVelocityChange, MessagePassing}
 import tyler.breakout.config.Configuration
 import tyler.breakout.{ImmutableVector2f, InGameGameState}
+import tyler.breakout.levels.RedBrick
 
 /**
  * Game specific collision detection. Only entrance point is through the common
@@ -16,6 +17,7 @@ object CollisionHandler {
     checkBatWallCollision(gameState, t)
     checkBallWallCollision(gameState, t)
     checkBallBatCollision(gameState, t)
+    checkBallBlockCollisions(gameState, t)
   }
 
   /**
@@ -85,5 +87,35 @@ object CollisionHandler {
 
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }
+  }
+
+  /**
+   * Check and handle any collisions between the ball and bricks. Reflect the ball
+   *
+   *
+   * @param gameState
+   * @param t
+   */
+  private def checkBallBrickCollisions(gameState: InGameGameState, t: Long) {
+    val ballPos = gameState.ballPosition(t)
+    val ballVel = gameState.ballVelocity(t)
+    val ballBottom = ballPos.y + Configuration.ballRadius
+    val ballTop = ballPos.y + Configuration.ballRadius
+    val ballLeft = ballPos.x - Configuration.ballRadius
+    val ballRight = ballPos.x + Configuration.ballRadius
+
+    def checkSingleCollision(brick: RedBrick) {
+      val brickTop = brick.y
+      val brickLeft = brick.x
+      val brickRight = brickLeft + brick.width
+      val brickBottom = brickTop + brick.height
+
+
+      if (brickLeft < ballLeft && brickRight > ballRight) {
+
+      }
+    }
+
+    gameState.allLiveBlocks(t).foreach(checkSingleCollision(_))
   }
 }
