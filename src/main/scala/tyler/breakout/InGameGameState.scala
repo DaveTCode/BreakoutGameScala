@@ -69,12 +69,9 @@ class InGameGameState(stateId: Int, game: Game, level: Level) extends NiftyOverl
       case message: BatVelocityChange => mEventBuffer += message
     }
   }
-  
-  def batPosition(t: Long) = mLevelInstance.batPosition(t, mEventBuffer)
-  def batVelocity(t: Long) = mLevelInstance.batVelocity(t, mEventBuffer)
-  
-  def ballPosition(t: Long) = mLevelInstance.ballPosition(t, mEventBuffer)
-  def ballVelocity(t: Long) = mLevelInstance.ballVelocity(t, mEventBuffer)
+
+  def ballState(t: Long) = mLevelInstance.ballState(t, mEventBuffer)
+  def batState(t: Long) = mLevelInstance.batState(t, mEventBuffer)
 
   def allLiveBlocks(t: Long) = mLevelInstance.liveBlocks(t, mEventBuffer)
 }

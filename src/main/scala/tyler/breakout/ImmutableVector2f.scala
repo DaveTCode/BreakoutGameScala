@@ -4,13 +4,10 @@ package tyler.breakout
  * Custom written immutable floating point vector since the Vector2f included
  * with Slick2d is mutable when using functions like scale.
  *
- * @param _x
- * @param _y
+ * @param x
+ * @param y
  */
-class ImmutableVector2f(private val _x: Float, private val _y: Float) {
-  
-  def x = _x
-  def y = _y
+class ImmutableVector2f(x: Float, y: Float) {
   
   def +(v: ImmutableVector2f): ImmutableVector2f = {
     new ImmutableVector2f(x + v.x, y + v.y)

@@ -2,6 +2,7 @@ package tyler.breakout
 
 import levels.RedBrick
 import messaging.{BrickHitEvent, BallVelocityChange, BatVelocityChange, Message}
+import annotation.tailrec
 
 class LevelInstance(level: Level) {
 
@@ -12,11 +13,10 @@ class LevelInstance(level: Level) {
    * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
-  private def batVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BatVelocityChange] = {
-    eventBuffer.filter(message => message.ticks < t) collect {
+  private def batVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BatVelocityChange] =
+    eventBuffer.filter(_.ticks < t) collect {
       case message: BatVelocityChange => message
     }
-  }
 
   /**
    * All velocity events for the ball in order from oldest to youngest
@@ -25,11 +25,10 @@ class LevelInstance(level: Level) {
    * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
-  private def ballVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BallVelocityChange] = {
-    eventBuffer.filter(message => message.ticks < t) collect {
+  private def ballVelocityEvents(t: Long, eventBuffer: Seq[Message]): Seq[BallVelocityChange] =
+    eventBuffer.filter(_.ticks < t) collect {
       case message: BallVelocityChange => message
     }
-  }
 
   /**
    * All events which indicate that a brick has been hit.
@@ -38,11 +37,10 @@ class LevelInstance(level: Level) {
    * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
-  private def brickHitEvents(t: Long, eventBuffer: Seq[Message]): Seq[BrickHitEvent] = {
-    eventBuffer.filter(message => message.ticks < t) collect  {
+  private def brickHitEvents(t: Long, eventBuffer: Seq[Message]): Seq[BrickHitEvent] =
+    eventBuffer.filter(_.ticks < t) collect  {
       case message: BrickHitEvent => message
     }
-  }
   
   /**
    * The latest velocity of the bat. Used to draw animations.
@@ -51,12 +49,11 @@ class LevelInstance(level: Level) {
    * @param eventBuffer - All messages for this level (can include messages beyond t).
    * @return
    */
-  def batVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
+  def batVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f =
     batVelocityEvents(t, eventBuffer) match {
       case Nil => level.initialBatVelocity()
       case lst => lst.last.vel
     }
-  }
 
   /**
    * The latest position of the bat. Used to draw the bat and determine
@@ -67,7 +64,7 @@ class LevelInstance(level: Level) {
    * @return
    */
   def batPosition(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
-    def recurCalcPosition(velocityChanges: List[BatVelocityChange],
+    @tailrec def recurCalcPosition(velocityChanges: List[BatVelocityChange],
                           currentPos: ImmutableVector2f,
                           currentVel: ImmutableVector2f,
                           currentTime: Long): ImmutableVector2f = {
@@ -99,12 +96,11 @@ class LevelInstance(level: Level) {
    *
    * @return
    */
-  def ballVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
+  def ballVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f =
     ballVelocityEvents(t, eventBuffer) match {
       case Nil => level.initialBallVelocity()
       case lst => lst.last.vel
     }
-  }
 
   /**
    * Calculate the current ball position. Used for collision handling and for
@@ -119,7 +115,7 @@ class LevelInstance(level: Level) {
    * @return Vector2f representing the ball position.
    */
   def ballPosition(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f = {
-    def recurCalcPosition(velocityChanges: List[BallVelocityChange],
+    @tailrec def recurCalcPosition(velocityChanges: List[BallVelocityChange],
                           currentPos: ImmutableVector2f,
                           currentVel: ImmutableVector2f,
                           currentTime: Long): ImmutableVector2f = {
@@ -142,6 +138,28 @@ class LevelInstance(level: Level) {
                       level.initialBallVelocity(),
                       0)
   }
+
+  /**
+   * Provides access to the ball state at a given time t. Access to velocity,
+   * position, future position.
+   *
+   * @param t
+   * @param eventBuffer
+   * @return
+   */
+  def ballState(t: Long, eventBuffer: Seq[Message]): BallGameState =
+    new BallGameState(ballPosition(t, eventBuffer), ballVelocity(t, eventBuffer))
+
+  /**
+   * Provides access to the bat state at a given time t. Access to velocity,
+   * position, future position.
+   *
+   * @param t
+   * @param eventBuffer
+   * @return
+   */
+  def batState(t: Long, eventBuffer: Seq[Message]): BatGameState =
+    new BatGameState(batPosition(t, eventBuffer), batVelocity(t, eventBuffer))
 
   /**
    * All live blocks at time t.

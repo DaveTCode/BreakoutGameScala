@@ -27,12 +27,9 @@ object CollisionHandler {
    * @param t - Number of ticks
    */
   private def checkBatWallCollision(gameState: InGameGameState, t: Long) {
-    val batPos = gameState.batPosition(t)
-    val batVel = gameState.batVelocity(t)
-    val batLeft = batPos.x - (Configuration.batWidth / 2.0f)
-    val batRight = batPos.x + (Configuration.batWidth / 2.0f)
+    val bat = gameState.ballState(t)
 
-    if (batLeft < 0.0f || batRight > Configuration.gameWidth) {
+    if (bat.left < 0.0f || bat.right > Configuration.gameWidth) {
       MessagePassing.send(new BatVelocityChange(t, new ImmutableVector2f(0.0f, 0.0f)))
     }
   }
@@ -45,14 +42,10 @@ object CollisionHandler {
    * @param t - Number of ticks
    */
   private def checkBallWallCollision(gameState: InGameGameState, t: Long) {
-    val ballPos = gameState.ballPosition(t)
-    val ballVel = gameState.ballVelocity(t)
-    val ballTop = ballPos.y - Configuration.ballRadius
-    val ballLeft = ballPos.x - Configuration.ballRadius
-    val ballRight = ballPos.x + Configuration.ballRadius
+    val ball = gameState.ballState(t)
     
-    if (ballLeft < 0.0f || ballRight > Configuration.gameWidth) {
-      val newVel = new ImmutableVector2f(-1.0f * ballVel.x, ballVel.y)
+    if (ball.left < 0.0f || ball.right > Configuration.gameWidth) {
+      val newVel = new ImmutableVector2f(-1.0f * ball.vel.x, ball.vel.y)
       
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }
@@ -72,18 +65,11 @@ object CollisionHandler {
    * @param t
    */
   private def checkBallBatCollision(gameState: InGameGameState, t: Long) {
-    val ballPos = gameState.ballPosition(t)
-    val ballVel = gameState.ballVelocity(t)
-    val batPos = gameState.batPosition(t)
-    val ballBottom = ballPos.y + Configuration.ballRadius
-    val ballLeft = ballPos.x - Configuration.ballRadius
-    val ballRight = ballPos.x + Configuration.ballRadius
-    val batTop = batPos.y
-    val batLeft = batPos.x
-    val batRight = batPos.x + Configuration.batWidth
+    val ball = gameState.ballState(t)
+    val bat = gameState.batState(t)
 
-    if (ballBottom > batTop && ballRight > batLeft && ballLeft < batRight) {
-      val newVel = new ImmutableVector2f(ballVel.x, -1 * ballVel.y)
+    if (ball.bottom > bat.top && ball.right > bat.left && ball.left < bat.right) {
+      val newVel = new ImmutableVector2f(ball.vel.x, -1 * ball.vel.y)
 
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }
@@ -97,12 +83,7 @@ object CollisionHandler {
    * @param t
    */
   private def checkBallBrickCollisions(gameState: InGameGameState, t: Long) {
-    val ballPos = gameState.ballPosition(t)
-    val ballVel = gameState.ballVelocity(t)
-    val ballBottom = ballPos.y + Configuration.ballRadius
-    val ballTop = ballPos.y + Configuration.ballRadius
-    val ballLeft = ballPos.x - Configuration.ballRadius
-    val ballRight = ballPos.x + Configuration.ballRadius
+    val ball = gameState.ballState(t)
 
     def checkSingleCollision(brick: RedBrick) {
       val brickTop = brick.y
@@ -111,7 +92,7 @@ object CollisionHandler {
       val brickBottom = brickTop + brick.height
 
 
-      if (brickLeft < ballLeft && brickRight > ballRight) {
+      if (brickLeft < ball.left && brickRight > ball.right) {
 
       }
     }
