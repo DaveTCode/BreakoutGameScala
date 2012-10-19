@@ -11,13 +11,13 @@ object Renderer {
   val redBrickImage = new Image(Configuration.redBrickImageFile)
   
   def draw(t: Long, gameState: InGameGameState) {
-    val ballPos = gameState.ballPosition(t)
-    val batPos = gameState.batPosition(t)
+    val ball = gameState.ballState(t)
+    val bat = gameState.batState(t)
     
     backgroundImage.draw(0.0f, 0.0f)
 
-    ballImage.draw(ballPos.x, ballPos.y)
-    batImage.draw(batPos.x, batPos.y)
+    ballImage.draw(ball.pos.x, ball.pos.y)
+    batImage.draw(bat.pos.x, bat.pos.y)
     
     gameState.allLiveBlocks(t).foreach(brick =>
       redBrickImage.draw(brick.x, brick.y, brick.width, brick.height)

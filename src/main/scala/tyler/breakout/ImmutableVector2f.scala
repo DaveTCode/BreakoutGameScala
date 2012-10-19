@@ -7,7 +7,7 @@ package tyler.breakout
  * @param x
  * @param y
  */
-class ImmutableVector2f(x: Float, y: Float) {
+class ImmutableVector2f(val x: Float, val y: Float) {
   
   def +(v: ImmutableVector2f): ImmutableVector2f = {
     new ImmutableVector2f(x + v.x, y + v.y)

@@ -1,6 +1,6 @@
 package tyler.breakout.collisions
 
-import tyler.breakout.messaging.{BallVelocityChange, BatVelocityChange, MessagePassing}
+import tyler.breakout.messaging.{BrickHitEvent, BallVelocityChange, BatVelocityChange, MessagePassing}
 import tyler.breakout.config.Configuration
 import tyler.breakout.{ImmutableVector2f, InGameGameState}
 import tyler.breakout.levels.RedBrick
@@ -17,7 +17,7 @@ object CollisionHandler {
     checkBatWallCollision(gameState, t)
     checkBallWallCollision(gameState, t)
     checkBallBatCollision(gameState, t)
-    checkBallBlockCollisions(gameState, t)
+    checkBallBrickCollisions(gameState, t)
   }
 
   /**
@@ -50,8 +50,8 @@ object CollisionHandler {
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }
     
-    if (ballTop < 0.0f) {
-      val newVel = new ImmutableVector2f(ballVel.x, -1 * ballVel.y)
+    if (ball.top < 0.0f) {
+      val newVel = new ImmutableVector2f(ball.vel.x, -1 * ball.vel.y)
 
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }
@@ -77,7 +77,9 @@ object CollisionHandler {
 
   /**
    * Check and handle any collisions between the ball and bricks. Reflect the ball
+   * on whichever line it hit the brick.
    *
+   * Also destroys the bricks.
    *
    * @param gameState
    * @param t
@@ -86,17 +88,54 @@ object CollisionHandler {
     val ball = gameState.ballState(t)
 
     def checkSingleCollision(brick: RedBrick) {
-      val brickTop = brick.y
-      val brickLeft = brick.x
-      val brickRight = brickLeft + brick.width
-      val brickBottom = brickTop + brick.height
+      val brickTopLeft = new ImmutableVector2f(brick.x, brick.y)
+      val brickTopRight = new ImmutableVector2f(brick.x + brick.width, brick.y)
+      val brickBottomLeft = new ImmutableVector2f(brick.x, brick.y + brick.height)
+      val brickBottomRight = new ImmutableVector2f(brick.x + brick.width, brick.y + brick.height)
 
+      val edges = List((brickTopLeft, brickTopRight, (1, -1)),
+                       (brickBottomLeft, brickBottomRight, (1, -1)),
+                       (brickTopLeft, brickBottomLeft, (-1, 1)),
+                       (brickTopRight, brickBottomRight, (-1, 1)))
+      edges.foreach{ case (lineStart, lineEnd, (x, y)) => {
+        if (circleLineCollision(ball.pos, Configuration.ballRadius, lineStart, lineEnd)) {
+          MessagePassing.send(new BrickHitEvent(t, brick))
 
-      if (brickLeft < ball.left && brickRight > ball.right) {
-
-      }
+          val newVel = new ImmutableVector2f(ball.vel.x * x, ball.vel.y * y)
+          MessagePassing.send(new BallVelocityChange(t, newVel))
+        }
+      }}
     }
 
     gameState.allLiveBlocks(t).foreach(checkSingleCollision(_))
+  }
+
+  /**
+   * Utility function to test whether a circle intersects a line.
+   *
+   * @param circlePos
+   * @param circleRad
+   * @param lineStart
+   * @param lineEnd
+   * @return
+   */
+  private def circleLineCollision(circlePos: ImmutableVector2f, circleRad: Float,
+                                  lineStart: ImmutableVector2f, lineEnd: ImmutableVector2f): Boolean = {
+    val d = lineEnd - lineStart
+    val f = circlePos - lineStart
+    val a = d dot d
+    val b = 2.0 * (f dot d)
+    val c = 4.0 * (f dot f) * circleRad * circleRad
+    val discriminator = b * b - 4 * a * c
+
+    if (discriminator >= 0) {
+      val root_disc = math.sqrt(discriminator)
+      val t1 = (-1.0 * b + root_disc) / 2 * a
+      val t2 = (-1.0 * b - root_disc) / 2 * a
+
+      (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1)
+    } else {
+      false
+    }
   }
 }

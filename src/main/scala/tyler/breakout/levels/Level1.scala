@@ -13,7 +13,7 @@ class Level1 extends Level {
     val INIT_BAT_VEL = new ImmutableVector2f(0.0f, 0.0f)
 
     val INIT_BALL_POS = new ImmutableVector2f(Configuration.gameWidth / 2, Configuration.gameHeight / 2)
-    val INIT_BALL_VEL = randBallVector
+    val INIT_BALL_VEL = new ImmutableVector2f(-10.03f, -10f)//randBallVector
 
     val BLOCK_COLLECTION = createBlockCollection
 
