@@ -1,8 +1,12 @@
 package tyler.breakout
 
 import levels.RedBrick
-import messaging.{BrickHitEvent, BallVelocityChange, BatVelocityChange, Message}
+import levels.RedBrick
+import messaging._
 import annotation.tailrec
+import messaging.BallVelocityChange
+import messaging.BatVelocityChange
+import messaging.BrickHitEvent
 
 class LevelInstance(level: Level) {
 
@@ -41,6 +45,19 @@ class LevelInstance(level: Level) {
     eventBuffer.filter(_.ticks < t) collect  {
       case message: BrickHitEvent => message
     }
+
+  /**
+   * All events which correspond to the player losing a life.
+   *
+   * @param t - Game time (as retrieved by Application.ticks)
+   * @param eventBuffer - All messages for this level (can include messages beyond t)
+   *
+   * @return - The list of all life loss events.
+   */
+  private def lifeLossEvents(t: Long, eventBuffer: Seq[Message]): Seq[LifeLost] =
+    eventBuffer.filter(_.ticks < t) collect {
+      case message: LifeLost => message
+    }
   
   /**
    * The latest velocity of the bat. Used to draw animations.
@@ -51,7 +68,7 @@ class LevelInstance(level: Level) {
    */
   def batVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f =
     batVelocityEvents(t, eventBuffer) match {
-      case Nil => level.initialBatVelocity()
+      case Nil => level.initialBatVelocity
       case lst => lst.last.vel
     }
 
@@ -83,8 +100,8 @@ class LevelInstance(level: Level) {
     }
 
     recurCalcPosition(batVelocityEvents(t, eventBuffer).toList,
-                      level.initialBatPosition(),
-                      level.initialBatVelocity(),
+                      level.initialBatPosition,
+                      level.initialBatVelocity,
                       0)
   }
 
@@ -98,7 +115,7 @@ class LevelInstance(level: Level) {
    */
   def ballVelocity(t: Long, eventBuffer: Seq[Message]): ImmutableVector2f =
     ballVelocityEvents(t, eventBuffer) match {
-      case Nil => level.initialBallVelocity()
+      case Nil => level.initialBallVelocity
       case lst => lst.last.vel
     }
 
@@ -134,8 +151,8 @@ class LevelInstance(level: Level) {
     }
 
     recurCalcPosition(ballVelocityEvents(t, eventBuffer).toList,
-                      level.initialBallPosition(),
-                      level.initialBallVelocity(),
+                      level.initialBallPosition,
+                      level.initialBallVelocity,
                       0)
   }
 
@@ -169,11 +186,21 @@ class LevelInstance(level: Level) {
    * @return
    */
   def liveBlocks(t: Long, eventBuffer: Seq[Message]): Seq[RedBrick] = {
-    val initBlockCollection = level.blockCollection()
+    val initBlockCollection = level.blockCollection
     val brickHitCollection = brickHitEvents(t, eventBuffer)
 
     initBlockCollection.filter(
       brick => !brickHitCollection.exists(message => message.brick == brick))
   }
+
+  /**
+   * The number of lives at time t in the event buffer.
+   *
+   * @param t - Game time (as retrieved by Application.ticks)
+   * @param eventBuffer - All messages for this level (can include messages beyond t).
+   * @return
+   */
+  def numLives(t: Long, eventBuffer: Seq[Message]): Int =
+    level.initialLifeCount - lifeLossEvents(t, eventBuffer).size
 }
 

@@ -14,11 +14,11 @@ object InputHandler {
   def handleEvents(input: Input) {
     if (input.isKeyPressed(Input.KEY_LEFT)) {
       MessagePassing.send(new BatVelocityChange(Application.ticks, 
-                                                new ImmutableVector2f(-15.0f, 0.0f)))
+                                                new ImmutableVector2f(-50.0f, 0.0f)))
     }
     if (input.isKeyPressed(Input.KEY_RIGHT)) {
       MessagePassing.send(new BatVelocityChange(Application.ticks,
-                                                new ImmutableVector2f(15.0f, 0.0f)))
+                                                new ImmutableVector2f(50.0f, 0.0f)))
     }
   }
 }

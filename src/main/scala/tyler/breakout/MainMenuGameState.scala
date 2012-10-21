@@ -1,16 +1,16 @@
 package tyler.breakout
 
-import org.newdawn.slick.state.{StateBasedGame}
+import org.newdawn.slick.state.StateBasedGame
 import de.lessvoid.nifty.Nifty
 import de.lessvoid.nifty.slick2d.NiftyBasicGameState
 import de.lessvoid.nifty.builder.{ImageBuilder, ScreenBuilder, LayerBuilder}
 
 class MainMenuGameState(stateId: Int, game: Game) extends NiftyBasicGameState  {
 
-  override def getID(): Int = stateId
+  override def getID: Int = stateId
 
   override def prepareNifty(nifty: Nifty, stateBasedGame: StateBasedGame) {
-    val screen = new ScreenBuilder("start") {{
+    val _ = new ScreenBuilder("start") {{
       controller(new MainMenuController(game))
       layer(new LayerBuilder("background") {{
         childLayoutCenter()
@@ -19,7 +19,7 @@ class MainMenuGameState(stateId: Int, game: Game) extends NiftyBasicGameState  {
           filename("/src/main/resources/main-menu-bg.png")
           width("800px")
           height("600px")
-        }});
+        }})
       }})
 
       layer (new LayerBuilder("buttons") {{

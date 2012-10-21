@@ -18,4 +18,6 @@ object Configuration {
   def ballImageFile = "/src/main/resources/ball.png"
   def batImageFile = "/src/main/resources/bat.png"
   def redBrickImageFile = "/src/main/resources/red-brick.png"
+
+  def scoreFontFile = "/src/main/resources/2TECH2.TTF"
 }

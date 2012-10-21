@@ -28,7 +28,7 @@ class InGameGameState(stateId: Int, game: Game, level: Level) extends NiftyOverl
           filename("/src/main/resources/main-menu-bg.png")
           width("800px")
           height("600px")
-        }});
+        }})
       }})
     }}.build(nifty)
   }
@@ -46,6 +46,7 @@ class InGameGameState(stateId: Int, game: Game, level: Level) extends NiftyOverl
     MessagePassing.register(this, (new BatVelocityChange(0, new ImmutableVector2f(0.0f, 0.0f))).name)
     MessagePassing.register(this, (new BallVelocityChange(0, new ImmutableVector2f(0.0f, 0.0f))).name)
     MessagePassing.register(this, (new BrickHitEvent(0, new RedBrick(0,0,0,0))).name)
+    MessagePassing.register(this, (new LifeLost(0)).name)
 
     initNifty(gameContainer, game)
   }
@@ -61,17 +62,33 @@ class InGameGameState(stateId: Int, game: Game, level: Level) extends NiftyOverl
                                     delta: Int) {
     InputHandler.handleEvents(gameContainer.getInput)
     CollisionHandler.checkCurrentCollisions(this, Application.ticks)
+
+    handleLoseCondition(Application.ticks)
   }
 
+  /**
+   * This is split into different sections to illustrate that different independent
+   * event types could be placed in separate message queues if required.
+   *
+   * @param message
+   */
   override def receive(message: Message) {
     message match {
       case message: BallVelocityChange => mEventBuffer += message
       case message: BatVelocityChange => mEventBuffer += message
+      case message: BrickHitEvent => mEventBuffer += message
+      case message: LifeLost => mEventBuffer += message
     }
   }
 
   def ballState(t: Long) = mLevelInstance.ballState(t, mEventBuffer)
   def batState(t: Long) = mLevelInstance.batState(t, mEventBuffer)
-
   def allLiveBlocks(t: Long) = mLevelInstance.liveBlocks(t, mEventBuffer)
+  def numLives(t: Long) = mLevelInstance.numLives(t, mEventBuffer)
+
+  def handleLoseCondition(t: Long) {
+    if (numLives(t) <= 0) {
+      game.enterState(game.MAIN_MENU_STATE_ID)
+    }
+  }
 }

@@ -1,8 +1,12 @@
 package tyler.breakout.collisions
 
-import tyler.breakout.messaging.{BrickHitEvent, BallVelocityChange, BatVelocityChange, MessagePassing}
+import tyler.breakout.messaging._
 import tyler.breakout.config.Configuration
 import tyler.breakout.{ImmutableVector2f, InGameGameState}
+import tyler.breakout.levels.RedBrick
+import tyler.breakout.messaging.BallVelocityChange
+import tyler.breakout.messaging.BrickHitEvent
+import tyler.breakout.messaging.BatVelocityChange
 import tyler.breakout.levels.RedBrick
 
 /**
@@ -16,6 +20,7 @@ object CollisionHandler {
   def checkCurrentCollisions(gameState: InGameGameState, t: Long) {
     checkBatWallCollision(gameState, t)
     checkBallWallCollision(gameState, t)
+    checkBallFloorCollision(gameState, t)
     checkBallBatCollision(gameState, t)
     checkBallBrickCollisions(gameState, t)
   }
@@ -27,23 +32,25 @@ object CollisionHandler {
    * @param t - Number of ticks
    */
   private def checkBatWallCollision(gameState: InGameGameState, t: Long) {
-    val bat = gameState.ballState(t)
+    val bat = gameState.batState(t)
 
     if (bat.left < 0.0f || bat.right > Configuration.gameWidth) {
-      MessagePassing.send(new BatVelocityChange(t, new ImmutableVector2f(0.0f, 0.0f)))
+      val newVel = new ImmutableVector2f(-1.0f * bat.vel.x, bat.vel.y)
+
+      MessagePassing.send(new BatVelocityChange(t, newVel))
     }
   }
 
   /**
    * If the ball hits the wall then it's velocity is reflected in the vertical
-   * plane (i.e. (xV, yV) -> (-xV, yV)
+   * plane (i.e. (xV, yV) -> (-xV, yV))
    *
    * @param gameState - Used to get at the ball position.
    * @param t - Number of ticks
    */
   private def checkBallWallCollision(gameState: InGameGameState, t: Long) {
     val ball = gameState.ballState(t)
-    
+
     if (ball.left < 0.0f || ball.right > Configuration.gameWidth) {
       val newVel = new ImmutableVector2f(-1.0f * ball.vel.x, ball.vel.y)
       
@@ -53,6 +60,17 @@ object CollisionHandler {
     if (ball.top < 0.0f) {
       val newVel = new ImmutableVector2f(ball.vel.x, -1 * ball.vel.y)
 
+      MessagePassing.send(new BallVelocityChange(t, newVel))
+    }
+  }
+
+  private def checkBallFloorCollision(gameState: InGameGameState, t:Long) {
+    val ball = gameState.ballState(t)
+
+    if (ball.bottom > Configuration.gameHeight) {
+      val newVel = new ImmutableVector2f(ball.vel.x, -1 * ball.vel.y)
+
+      MessagePassing.send(new LifeLost((t)))
       MessagePassing.send(new BallVelocityChange(t, newVel))
     }
   }
@@ -68,7 +86,9 @@ object CollisionHandler {
     val ball = gameState.ballState(t)
     val bat = gameState.batState(t)
 
-    if (ball.bottom > bat.top && ball.right > bat.left && ball.left < bat.right) {
+    if (circleLineCollision(ball.pos, Configuration.ballRadius,
+                            new ImmutableVector2f(bat.left, bat.top),
+                            new ImmutableVector2f(bat.right, bat.top))) {
       val newVel = new ImmutableVector2f(ball.vel.x, -1 * ball.vel.y)
 
       MessagePassing.send(new BallVelocityChange(t, newVel))
@@ -101,7 +121,10 @@ object CollisionHandler {
         if (circleLineCollision(ball.pos, Configuration.ballRadius, lineStart, lineEnd)) {
           MessagePassing.send(new BrickHitEvent(t, brick))
 
-          val newVel = new ImmutableVector2f(ball.vel.x * x, ball.vel.y * y)
+          val newVel = new ImmutableVector2f(if ((ball.vel.x > 0 && x < 0) ||
+                                                 (ball.vel.x < 0 && x > 0)) -ball.vel.x else ball.vel.x,
+                                             if ((ball.vel.y > 0 && y < 0) ||
+                                                 (ball.vel.y < 0 && y > 0)) -ball.vel.y else ball.vel.y)
           MessagePassing.send(new BallVelocityChange(t, newVel))
         }
       }}
@@ -122,16 +145,16 @@ object CollisionHandler {
   private def circleLineCollision(circlePos: ImmutableVector2f, circleRad: Float,
                                   lineStart: ImmutableVector2f, lineEnd: ImmutableVector2f): Boolean = {
     val d = lineEnd - lineStart
-    val f = circlePos - lineStart
+    val f = lineStart - circlePos
     val a = d dot d
-    val b = 2.0 * (f dot d)
-    val c = 4.0 * (f dot f) * circleRad * circleRad
-    val discriminator = b * b - 4 * a * c
+    val b = 2f * (f dot d)
+    val c = (f dot f) - circleRad * circleRad
+    val discriminant = b * b - 4f * a * c
 
-    if (discriminator >= 0) {
-      val root_disc = math.sqrt(discriminator)
-      val t1 = (-1.0 * b + root_disc) / 2 * a
-      val t2 = (-1.0 * b - root_disc) / 2 * a
+    if (discriminant >= 0) {
+      val root_disc = math.sqrt(discriminant)
+      val t1 = (-1f * b + root_disc) / (2f * a)
+      val t2 = (-1f * b - root_disc) / (2f * a)
 
       (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1)
     } else {

@@ -12,10 +12,8 @@ object Application {
 
     agc.setTargetFrameRate(Configuration.framerate)
     agc.setDisplayMode(Configuration.gameWidth, Configuration.gameHeight, Configuration.fullscreen)
-    agc.start()
+    agc.start
   }
   
-  def ticks: Long = {
-    System.currentTimeMillis() - startTime
-  }
+  def ticks: Long = System.currentTimeMillis() - startTime
 }
